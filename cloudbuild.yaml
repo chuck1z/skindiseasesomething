@@ -24,5 +24,7 @@ steps:
       - "--allow-unauthenticated"
       - "--region"
       - "asia-southeast2"
+      - "--memory"
+      - "1Gi"
 images:
   - "gcr.io/$PROJECT_ID/skindieseasesomething:$COMMIT_SHA"
