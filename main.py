@@ -8,16 +8,19 @@ from tensorflow.keras.preprocessing import image
 import shutil
 import time
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
+port = int(os.getenv("PORT"))
 app = FastAPI()  # create a new FastAPI app instance
 
 t = time.time()
 export_path = "saved_model/1685796311".format(int(t))
-model = tf.keras.models.load_model(export_path, custom_objects={
-    'KerasLayer': hub.KerasLayer})
+model = tf.keras.models.load_model(
+    export_path, custom_objects={"KerasLayer": hub.KerasLayer}
+)
 
-Labels = ['Atopic-Dermatitis', 'Poison-Ivy', 'Scabies-Lyme']
+Labels = ["Atopic-Dermatitis", "Poison-Ivy", "Scabies-Lyme"]
+
 
 def predict(img):
     img = tf.io.read_file(img)  # Read the image file
@@ -27,12 +30,12 @@ def predict(img):
     probabilities = model.predict(np.asarray([img]))[0]
     class_idx = np.argmax(probabilities)
 
-    return {Labels[class_idx]: probabilities[class_idx]}
+    return [Labels[class_idx], probabilities[class_idx]]
 
 
 @app.get("/")
 def hello_world():
-    return ("hello world")
+    return "hello world"
 
 
 @app.post("/predict")
@@ -43,3 +46,7 @@ def classify(input: UploadFile = File(...)):
     result = predict(savefile)
     os.remove(savefile)
     return str(result)
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=port, timeout_keep_alive=1200)
